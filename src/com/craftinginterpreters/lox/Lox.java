@@ -48,9 +48,18 @@ public class Lox {
     List<Token> tokens = scanner.scanTokens();
 
     // for now, just print the tokens.
-    for (Token token: tokens) {
-      System.out.println(token);
-    }
+    //for (Token token: tokens) {
+    //  System.out.println(token);
+    //}
+
+    Parser parser = new Parser(tokens);
+    Expr expression = parser.parse();
+
+    // stop if there was a syntax error
+    if (hadError) return;
+
+    // otherwise print AST
+    System.out.println(new AstPrinter().print(expression));
   }
 
   static void error(int line, String message) {
