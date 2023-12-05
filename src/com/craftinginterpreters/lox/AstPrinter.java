@@ -4,11 +4,30 @@ import com.craftinginterpreters.lox.Expr.Binary;
 import com.craftinginterpreters.lox.Expr.Grouping;
 import com.craftinginterpreters.lox.Expr.Literal;
 import com.craftinginterpreters.lox.Expr.Unary;
+import com.craftinginterpreters.lox.Expr.Variable;
+import com.craftinginterpreters.lox.Stmt.Expression;
+import com.craftinginterpreters.lox.Stmt.Print;
+import com.craftinginterpreters.lox.Stmt.Var;
 
-class AstPrinter implements Expr.Visitor<String>{
+class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
 
-  String print(Expr expr) {
-    return expr.accept(this);
+  String print(Stmt stmt) {
+    return stmt.accept(this);
+  }
+
+  @Override
+  public String visitExpressionStmt(Expression stmt) {
+    return stmt.expression.accept(this);
+  }
+
+  @Override
+  public String visitPrintStmt(Print stmt) {
+    return parenthesize("print", stmt.expression);
+  }
+
+  @Override
+  public String visitVarStmt(Var stmt) {
+    return parenthesize("def " + stmt.name.lexeme, stmt.initializer);
   }
 
   @Override
@@ -28,6 +47,11 @@ class AstPrinter implements Expr.Visitor<String>{
   }
 
   @Override
+  public String visitVariableExpr(Variable expr) {
+    return expr.name.lexeme;
+  }  
+
+  @Override
   public String visitUnaryExpr(Unary expr) {
     return parenthesize(expr.operator.lexeme, expr.right);
   }
@@ -44,19 +68,4 @@ class AstPrinter implements Expr.Visitor<String>{
 
     return builder.toString();
   }
-
-  // just for demo purposes
-  // public static void main(String[] args) {
-  //   Expr expression = new Expr.Binary(
-  //     new Expr.Unary(
-  //       new Token(TokenType.MINUS, "-", null, 1),
-  //       new Expr.Literal(123)
-  //     ), 
-  //     new Token(TokenType.STAR, "*", null, 1), 
-  //     new Expr.Grouping(new Expr.Literal(45.67))
-  //   );
-
-  //   System.out.println(new AstPrinter().print(expression));
-  // }
-  
 }
